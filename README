@@ -1,0 +1,19 @@
+Bazhenov thalamocortical augmenting response model
+replicates Fig. 6B
+Maxim Bazhenov, Igor Timofeev, Mircea Steriade, and Terrence J. Sejnowski
+Computational Models of Thalamocortical Augmenting Responses
+J. Neurosci. 1998 18: 6444-6465.
+
+Usage :
+nrnivmodl
+nrngui batch_.hoc
+
+NOTE:
+Simulation replicated directly from M. Bazhenov's C++ file.
+
+Cortical SU cells are getting too little stimulation; I was unable to find the
+parameter discrepancy that accounted for this.
+
+This simulation takes a couple of minutes to run on a 800 MHz Pentium III mswin pc.
+
+target simulation shown in jnsci18_6444F6B.jpg
