@@ -11,9 +11,14 @@ nrngui batch_.hoc
 NOTE:
 Simulation replicated directly from M. Bazhenov's C++ file.
 
-Cortical SU cells are getting too little stimulation; I was unable to find the
-parameter discrepancy that accounted for this.
+Cortical SU cells are getting too little stimulation; I was unable to
+find the parameter discrepancy that accounted for this.
 
-This simulation takes a couple of minutes to run on a 800 MHz Pentium III mswin pc.
+This simulation takes a couple of minutes to run on a 800 MHz Pentium
+III mswin pc.
 
 target simulation shown in jnsci18_6444F6B.jpg
+
+20120112 cad.mod and gababS.mod updated to use derivimplicit and cnexp
+in place of euler and cadecay.mod switched to derivimplicit as per
+http://www.neuron.yale.edu/phpbb/viewtopic.php?f=28&t=592
