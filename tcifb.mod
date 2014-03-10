@@ -55,7 +55,7 @@ DERIVATIVE states {
 NET_RECEIVE (w) {
   if (flag==0) {
     net_event(t)
-    net_send(1e-4)
+    net_send(1e-4,1) : any non zero flag will do 
     state_discontinuity(gshort, 1e5) : short circuit
   } else {
     state_discontinuity(gshort, 0)   : close the short
