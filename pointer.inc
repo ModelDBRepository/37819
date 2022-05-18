@@ -15,7 +15,7 @@ ASSIGNED {
 
 PROCEDURE setptr() {
   VERBATIM  
-  { extern Object** hoc_objgetarg();
+  { extern Object** hoc_objgetarg(int);
     p =     (double)(unsigned long)*hoc_objgetarg(1);
   }  
   ENDVERBATIM  
