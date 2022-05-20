@@ -32,12 +32,14 @@ ASSIGNED {
 }
 
 VERBATIM
+#ifndef NRN_VERSION_GTEQ_8_2_0
 extern double* vector_vec();
 extern int vector_capacity();
 extern void* vector_arg();
 extern double* hoc_pgetarg();
 extern Object** hoc_objgetarg(int);
 extern char* hoc_object_name(Object*);
+#endif
 double *a1, *a2, *a3;
 Object *tvec, *tmpvec;
 char str[100];

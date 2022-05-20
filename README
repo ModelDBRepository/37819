@@ -19,6 +19,9 @@ III mswin pc.
 
 target simulation shown in jnsci18_6444F6B.jpg
 
+Changelog
+---------
+
 20120112 cad.mod and gababS.mod updated to use derivimplicit and cnexp
 in place of euler and cadecay.mod switched to derivimplicit as per
 http://www.neuron.yale.edu/phpbb/viewtopic.php?f=28&t=592
@@ -29,4 +32,6 @@ be called with the same number of arguments with which the function is
 declared.  A net_send() call had a flag parameter added to it to
 satisfy this. The results of the auto-launch demo simulation are
 unchanged.
- 
+
+20220520: Updated MOD files to contain valid C++ and be compatible with
+          the upcoming versions 8.2 and 9.0 of NEURON.
