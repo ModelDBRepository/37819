@@ -32,12 +32,14 @@ ASSIGNED {
 }
 
 VERBATIM
+#ifndef NRN_VERSION_GTEQ_8_2_0
 extern double* vector_vec();
 extern int vector_capacity();
 extern void* vector_arg();
 extern double* hoc_pgetarg();
-extern Object** hoc_objgetarg();
+extern Object** hoc_objgetarg(int);
 extern char* hoc_object_name(Object*);
+#endif
 double *a1, *a2, *a3;
 Object *tvec, *tmpvec;
 char str[100];
@@ -46,7 +48,7 @@ ENDVERBATIM
 PROCEDURE recval () {
 VERBATIM	
   { void* vv; int i, size; double* px;
-    if (savnum==0) { return; }
+    if (savnum==0) { return 0; }
     vv = *((void**)(&space0));
     if (! vv) { hoc_execerror("ERR: no time vector defined for PP::recval.\n",0); }
 
@@ -85,7 +87,7 @@ VERBATIM
 {
   void** vv;
 
-  if (! ifarg(1)) { savnum=0; return; 
+  if (! ifarg(1)) { savnum=0; return 0;
   } 
 
   if (ifarg(3)) { /* nice place to save time */

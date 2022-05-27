@@ -34,6 +34,12 @@ PARAMETER {
   MATRIX_INSTALLED=0
 }
 
+VERBATIM
+#ifndef NRN_VERSION_GTEQ_8_2_0
+extern double hoc_call_func(Symbol*, int narg);
+#endif
+ENDVERBATIM
+
 :* mat.outprod(x,y) // mat = outer product of vectors x and y
 VERBATIM
 static double outprod(void* vv) {
@@ -84,7 +90,6 @@ VERBATIM
 static double spltp(void* vv) {
   int ii, jj, nstpr, nstpo, nw, npr, npo, flag, cnt;
   double *stpr, *stpo, *w, *pr, *po;
-  extern double hoc_call_func(Symbol*, int narg);
 
   char func[4] = "ltp";
   Symbol* s = hoc_lookup(func);

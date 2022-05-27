@@ -77,9 +77,10 @@ ASSIGNED { RES }
 VERBATIM
 #include <stdlib.h>
 #include <math.h>
-/* #include <values.h> /* contains MAXLONG */
 #include <limits.h> /* contains MAXLONG */
 #include <sys/time.h> 
+
+#ifndef NRN_VERSION_GTEQ_8_2_0
 extern double* hoc_pgetarg();
 extern double hoc_call_func(Symbol*, int narg);
 extern FILE* hoc_obj_file_arg(int narg);
@@ -87,6 +88,7 @@ extern void vector_resize();
 extern int vector_instance_px();
 extern void* vector_arg();
 extern double hoc_epsilon;
+#endif
 ENDVERBATIM
  
 :* v1.slope(num) does a linear regression to find the slope, assuming num=timestep of vector
@@ -335,7 +337,7 @@ static double fewind(void* vv) {
         for (j=0;j<num;j++) {
           for (i=0;i<ni;i++) x[i]=vvo[j][scr[i]];    
           for (i=0;i<ni;i++) vvo[j][i]=x[i];   
-          vv=vector_arg(j+2); vector_resize(vv, ni);
+          vv=vector_arg(j+2); vector_resize((IvocVect*)vv, ni);
         }
 	return ni;
 }
@@ -364,8 +366,8 @@ static double findx(void* vv) {
         for (i=0;i<num;i++) { 
           bv[i]=vector_arg_px(num+i+1, &bvo[i]); /* dest vectors */
           vv=vector_arg(num+i+1);
-          if (vector_buffer_size(vv)<ni) { 
-            printf("findx ****ERRD**** arg#%d need:%d sz:%d\n",num+i+1,ni,vector_buffer_size(vv));
+          if (vector_buffer_size((IvocVect*)vv)<ni) {
+            printf("findx ****ERRD**** arg#%d need:%d sz:%d\n",num+i+1,ni,vector_buffer_size((IvocVect*)vv));
             hoc_execerror("Destination vector with insufficient size: ", 0); }
         }
         if (ni>scrsz) { 
@@ -379,7 +381,7 @@ static double findx(void* vv) {
         }
         for (j=0,i=0;j<num;j++) { // j goes through vectors
           vv=vector_arg(j+num+1); 
-          vector_resize(vv, ni);
+          vector_resize((IvocVect*)vv, ni);
           for (i=0;i<ni;i++) bvo[j][i]=avo[j][scr[i]];    
         }
 	return ni;
@@ -468,7 +470,7 @@ static double slct(void* vv) {
   int i, j, k, m, n, ni, nk, na, nv[10], num, fl;
   double *ind, *key, *arg, *vvo[10];
   ni = vector_instance_px(vv, &ind); // vv is ind
-  for (i=0;ifarg(i);i++); i--; // drop back by one to get numarg()
+  for (i=0;ifarg(i);i++) {} i--; // drop back by one to get numarg()
   if (i>12) hoc_execerror("ERR: vecst::slct can only handle 10 vectors", 0);
   num = i-2; /* number of vectors to be picked apart */
   for (i=0;i<num;i++) { 
@@ -510,7 +512,7 @@ static double slct(void* vv) {
     }
     if (fl) ind[k++]=j; // all equal
   }
-  vector_resize(vv, k);
+  vector_resize((IvocVect*)vv, k);
   return k;
 }
 ENDVERBATIM
@@ -521,7 +523,7 @@ VERBATIM
 static double iwr(void* vv) {
   int i, j, nx;
   double *x;
-  FILE* f, *hoc_obj_file_arg();
+  FILE* f;
   f = hoc_obj_file_arg(1);
   nx = vector_instance_px(vv, &x);
   if (nx>scrsz) { 
@@ -542,7 +544,7 @@ VERBATIM
 static double ird(void* vv) {
   int i, j, nx, n;
   double *x;
-  FILE* f, *hoc_obj_file_arg();
+  FILE* f;
   f = hoc_obj_file_arg(1);
   nx = vector_instance_px(vv, &x);
   fread(&n,sizeof(int),1,f);  // size
@@ -552,9 +554,9 @@ static double ird(void* vv) {
     scr=(int *)ecalloc(scrsz, sizeof(int));
   }
   if (n!=nx) { 
-    nx=vector_buffer_size(vv);
+    nx=vector_buffer_size((IvocVect*)vv);
     if (n<=nx) {
-      vector_resize(vv, n); nx=n; 
+      vector_resize((IvocVect*)vv, n); nx=n; 
     } else {
       printf("%d > %d :: ",n,nx);
       hoc_execerror("Vector max capacity too small for ird ", 0);
@@ -573,15 +575,15 @@ static double insct(void* vv) {
 	int i, j, k, nx, nv1, nv2, maxsz;
 	double *x, *v1, *v2;
 	nx = vector_instance_px(vv, &x);
-        maxsz=vector_buffer_size(vv);
-        vector_resize(vv, maxsz);
+        maxsz=vector_buffer_size((IvocVect*)vv);
+        vector_resize((IvocVect*)vv, maxsz);
 	nv1 = vector_arg_px(1, &v1);
 	nv2 = vector_arg_px(2, &v2);
         for (i=0,k=0;i<nv1;i++) for (j=0;j<nv2;j++) if (v1[i]==v2[j]) {
           if (k<maxsz) { x[k++]=v1[i]; } else {k++;}}  /* v1[i] found in both vectors */
         if (k>maxsz) { 
           printf("\tinsct WARNING: ran out of room: %d<%d\n",maxsz,k);
-        } else { vector_resize(vv, k); }
+        } else { vector_resize((IvocVect*)vv, k); }
 	return (double)k;
 }
 ENDVERBATIM
@@ -593,8 +595,8 @@ static double cull(void* vv) {
 	int i, j, k, nx, nv1, nv2, maxsz, flag;
 	double *x, *v1, *v2;
 	nx = vector_instance_px(vv, &x);
-        maxsz=vector_buffer_size(vv);
-        vector_resize(vv, maxsz);
+        maxsz=vector_buffer_size((IvocVect*)vv);
+        vector_resize((IvocVect*)vv, maxsz);
 	nv1 = vector_arg_px(1, &v1);
 	nv2 = vector_arg_px(2, &v2);
         for (i=0,k=0;i<nv1;i++) {
@@ -604,7 +606,7 @@ static double cull(void* vv) {
         }
         if (k>maxsz) { 
           printf("\tcull WARNING: ran out of room: %d<%d\n",maxsz,k);
-        } else { vector_resize(vv, k); }
+        } else { vector_resize((IvocVect*)vv, k); }
 	return (double)k;
 }
 ENDVERBATIM
@@ -617,14 +619,14 @@ static double redundout(void* vv) {
 	double *x, *v1, val;
         if (ifarg(2)) indflag=1; else indflag=0; 
 	nx = vector_instance_px(vv, &x);
-        maxsz=vector_buffer_size(vv);
-        vector_resize(vv, maxsz);
+        maxsz=vector_buffer_size((IvocVect*)vv);
+        vector_resize((IvocVect*)vv, maxsz);
 	nv1 = vector_arg_px(1, &v1);
         val=v1[0]; x[0]=(indflag?0:val);
         for (j=1,i=1;i<nv1&&j<maxsz;i++) if (v1[i]!=val) { val=v1[i]; x[j++]=(indflag?i:val); }
         if (j==maxsz) { 
           printf("\tredundout WARNING: ran out of room: %d<needed\n",maxsz);
-        } else { vector_resize(vv, j); }
+        } else { vector_resize((IvocVect*)vv, j); }
 	return (double)j;
 }
 ENDVERBATIM
@@ -646,6 +648,7 @@ static double cvlv(void* vv) {
       if (k>0 && k<nsrc-1) x[i]+=filt[j]*src[k];
     }
   }
+  return 0.;
 }
 ENDVERBATIM
 
@@ -665,6 +668,7 @@ static double intrp(void* vv) {
     for (i=la+1; i<lb; i++) x[i]= a + (b-a)/(lb-la)*(i-la);
     a=b; la=lb;
   }
+  return 0.;
 }
 ENDVERBATIM
 
@@ -704,7 +708,7 @@ static double nind(void* vv) {
           }
           for (k=last+1;k<nx;k++,m++) { x[m]=vvo[j][k]; }
           for (i=0;i<c;i++) vvo[j][i]=x[i];   
-          vv=vector_arg(j+2); vector_resize(vv, c);
+          vv=vector_arg(j+2); vector_resize((IvocVect*)vv, c);
         }
 	return c;
 }
@@ -717,7 +721,7 @@ static double keyind(void* vv) {
   int i, j, k, ni, nk, nv[10], num;
   double *ind, *key, *vvo[10];
   ni = vector_instance_px(vv, &ind); // vv is ind
-  for (i=0;ifarg(i);i++); i--; // drop back by one to get numarg()
+  for (i=0;ifarg(i);i++) {} i--; // drop back by one to get numarg()
   if (i>10) hoc_execerror("ERR: keyind can only handle 9 vectors", 0);
   num = i-1; /* number of vectors to be picked apart */
   for (i=0;i<num;i++) { 
@@ -739,7 +743,7 @@ static double keyind(void* vv) {
     }
     if (i==nk) ind[k++]=j; // all equal
   }
-  vector_resize(vv, k);
+  vector_resize((IvocVect*)vv, k);
   return k;
 }
 ENDVERBATIM
@@ -895,6 +899,7 @@ static double bpeval(void* vv) {
   } else {
     for (i=0;i<n;i++) vo[i]=outp[i]*(1.-1.*outp[i])*del[i];
   }
+  return 0.;
 }
 ENDVERBATIM
  
@@ -968,8 +973,8 @@ static double xing(void* vv) {
   nsrc = vector_arg_px(1, &src);
   ntvec = vector_arg_px(2, &tvec);
   th = *getarg(3);
-  maxsz=vector_buffer_size(vv);
-  vector_resize(vv, maxsz);
+  maxsz=vector_buffer_size((IvocVect*)vv);
+  vector_resize((IvocVect*)vv, maxsz);
   if (nsrc!=ntvec) hoc_execerror("v.xing: vectors not all same size", 0);
   for (i=0,f=0,j=0; i<nsrc; i++) {
     if (src[i]>th) { /* ? passing thresh */
@@ -987,7 +992,7 @@ static double xing(void* vv) {
       if (f==1) { f=0; } /* just passed going down */
     }
   }
-  vector_resize(vv, j);
+  vector_resize((IvocVect*)vv, j);
   return (double)i;
 }
 ENDVERBATIM
@@ -1180,9 +1185,9 @@ static double smgs(void* vv) {
 
   points = (int)((high-low)/step+hoc_epsilon);
   if (nsum!=points) { 
-    maxsz=vector_buffer_size(vv);
+    maxsz=vector_buffer_size((IvocVect*)vv);
     if (points<=maxsz) {
-      vector_resize(vv, nsum); nsum=points; 
+      vector_resize((IvocVect*)vv, nsum); nsum=points; 
     } else {
       printf("%d > %d :: ",points,maxsz);
       hoc_execerror("Vector max capacity too small in smgs ", 0);
