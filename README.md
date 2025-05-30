@@ -1,0 +1,35 @@
+# Bazhenov thalamocortical augmenting response model replicates Fig. 6B
+
+**Maxim Bazhenov, Igor Timofeev, Mircea Steriade, and Terrence J. Sejnowski**  
+*Computational Models of Thalamocortical Augmenting Responses*  
+*J. Neurosci.* 1998 18: 6444-6465.
+
+## Usage :
+
+- nrnivmodl
+- nrngui batch_.hoc
+
+## NOTE:
+
+Simulation replicated directly from M. Bazhenov's C++ file.
+
+Cortical SU cells are getting too little stimulation; I was unable to
+find the parameter discrepancy that accounted for this.
+
+This simulation takes a couple of minutes to run on a 800 MHz Pentium
+III mswin pc.
+
+Target simulation shown in jnsci18_6444F6B.jpg
+
+---
+
+Changelog
+---------
+
+- 20120112 cad.mod and gababS.mod updated to use derivimplicit and cnexp in place of euler and cadecay.mod switched to derivimplicit as per http://www.neuron.yale.edu/phpbb/viewtopic.php?f=28&t=592
+
+- 20140310 tcifb.mod updated to be compatible with most recent developers version of neuron (1027) which requires functions in C to be called with the same number of arguments with which the function is declared.  A net_send() call had a flag parameter added to it to satisfy this. The results of the auto-launch demo simulation are unchanged.
+
+- 20220520 Updated MOD files to contain valid C++ and be compatible with the upcoming versions 8.2 and 9.0 of NEURON.
+
+- 20250527 Standardized to Markdown.
